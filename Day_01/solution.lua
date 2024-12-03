@@ -1,28 +1,77 @@
-local file = io.open("input.txt", "r")
-local list_a = {} -- Global variable in lowercase init
-local list_b = {} -- Global variable in lowercase init
-
-for line in file:lines() do
-  local j = 1
-    for i in string.gmatch(line, "%S+") do
-      if j == 1 then
-        table.insert(list_a, tonumber(i))
-    else
-        table.insert(list_b, tonumber(i))
-    end
-      j = j + 1
-    end
-end
-file:close()
-
-table.sort(list_a)
-table.sort(list_b)
-
-distance = 0
-
-for i = 1, math.min(#list_a, #list_b) do
-  -- print(list_a[i],list_b[i],distance)
-    distance = math.abs(list_b[i] - list_a[i]) + distance
+local function open_file(file_name)
+  local file = io.open(file_name, "r")
+  if file ~= nil then
+    return file
+  else
+    print("File not found.")
+    return nil
+  end
 end
 
-print(distance)
+local function close_file(file)
+  if file then
+    file:close()
+  else
+    print("No file to close")
+  end
+end
+
+local function parse_line(line)
+  local list = {}
+  for number in line:gmatch("%S+") do
+    table.insert(list, number)
+  end
+  return list
+end
+
+local function solution_one(left_list, right_list)
+  table.sort(left_list)
+  table.sort(right_list)
+  distance = 0
+
+  for i = 1, math.min(#left_list, #right_list) do
+    distance = math.abs(right_list[i] - left_list[i]) + distance
+  end
+  print(distance)
+end
+
+local function solution_two(left_list, right_list)
+  local distance = 0
+  for i = 1, #left_list do
+    local line_distance = 0
+    local count = 0
+    for j = 1, #right_list do
+      if left_list[i] == right_list[j] then
+        count = count + 1
+      end
+    end
+    line_distance = count * left_list[i]
+    distance = line_distance + distance
+  end
+  print(distance)
+end
+
+local function main(file_name)
+  local file = open_file(file_name)
+  local left_list = {}
+  local right_list = {}
+  if file ~= nil then
+    for line in file:lines() do
+      local list = parse_line(line)
+      table.insert(left_list, list[1])
+      table.insert(right_list, list[2])
+    end
+  else
+    print("Error opening file")
+  end
+
+  solution_one(left_list, right_list)
+  solution_two(left_list, right_list)
+  close_file(file)
+end
+
+if #arg == 1 then
+  main(arg[1])
+else
+  print("Not enough arguments")
+end
