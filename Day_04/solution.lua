@@ -34,7 +34,7 @@ local function parse_text(file)
   return text_array
 end
 
-function find_x(text)
+local function find_x(text)
   for i = 1, #text do
     for j = 1, #text[i] do
       if text[i][j] == 'X' then
@@ -44,8 +44,9 @@ function find_x(text)
   end
 end
 
-local function find_xmas(pos_x, pos_y, grid)
-  local directions = {"right","left","down","up"}
+local function solution_one(pos_x, pos_y, grid)
+  local count = 0
+  local directions = {"right","left","down","up","ur","ul","dr","dl"}
   for _, direction in ipairs(directions) do
     local line_string = {}
      if direction == "right" then
@@ -72,16 +73,58 @@ local function find_xmas(pos_x, pos_y, grid)
           table.insert(line_string, grid[pos_x - i][pos_y])
         end
       end
-    elseif direction == "UR" then
-    elseif direction == "UL" then
-    elseif direction == "DR" then
-    elseif direction == "DL" then
+    elseif direction == "dr" then
+      for i = 0, 3 do
+        if pos_x + i <= #grid and pos_y + i <= #grid[pos_x] then
+          table.insert(line_string, grid[pos_x + i][pos_y + i])
+        end
+      end
+    elseif direction == "ur" then
+      for i = 0, 3 do
+        if pos_x - i > 0 and pos_y + i <= #grid[pos_x] then
+          table.insert(line_string, grid[pos_x - i][pos_y + i])
+        end
+      end
+    elseif direction == "ul" then
+      for i = 0, 3 do
+        if pos_x - i > 0 and pos_y - i > 0 then
+          table.insert(line_string, grid[pos_x - i][pos_y - i])
+        end
+      end
+    elseif direction == "dl" then
+      for i = 0, 3 do
+        if pos_x + i <= #grid and pos_y - i > 0 then
+          table.insert(line_string, grid[pos_x + i][pos_y - i])
+        end
+      end
     end
-     if table.concat(line_string) == "XMAS" then
-       print(table.concat(line_string))
-     end
+    if table.concat(line_string) == "XMAS" then
+      count = count + 1
     end
   end
+  return count
+end
+
+
+local function solution_two(grid)
+  local count = 0
+  for x = 2, #grid - 1 do
+    for y = 2, #grid[x] - 1 do
+      if grid[x] and grid[x][y] == 'A' and
+         grid[x-1] and grid[x-1][y-1] and
+         grid[x+1] and grid[x+1][y+1] and
+         grid[x+1] and grid[x+1][y-1] and
+         grid[x-1] and grid[x-1][y+1] then
+        local diag_one = (grid[x-1][y-1] .. grid[x][y] .. grid[x+1][y+1])
+        local diag_two = (grid[x+1][y-1] .. grid[x][y] .. grid[x-1][y+1])
+        if (diag_one == "MAS" or diag_one == "SAM") and (diag_two == "MAS" or diag_two == "SAM") then
+          count = count + 1
+        end
+      end
+    end
+  end
+  return count
+end
 
 X_Positions = {}
 
@@ -95,18 +138,13 @@ local function main(file_name)
   local text_grid = parse_text(file)
 
   find_x(text_grid)
-
-  -- for i = 1, #X_Positions do
-  --   for j = 1, #X_Positions[i] do
-  --     print(X_Positions[i][j])
-  --   end
-  -- end
-
-  
-
+  local sol_one_final_tally = 0
   for _, pos in ipairs(X_Positions) do
-      find_xmas(pos[1], pos[2], text_grid)
+      sol_one_final_tally = sol_one_final_tally + solution_one(pos[1], pos[2], text_grid)
   end
+
+  print("Solution One: ", sol_one_final_tally)
+  print("Solution Two", solution_two(text_grid))
 
   close_file(file)
 end
