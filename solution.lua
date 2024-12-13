@@ -1,12 +1,12 @@
 local function open_file(file_name)
   if type(file_name) ~= "string" or file_name == "" then
-    print("Invalid file name.")
+    print("Error: Invalid file name.")
     return nil
   end
 
-  local file = io.open(file_name, "r")
+  local file, err = io.open(file_name, "r")
   if not file then
-    print("File not found.")
+    print("Error: File not found. " .. (err or ""))
     return nil
   end
 
@@ -16,17 +16,17 @@ end
 local function close_file(file)
   if file then
     file:close()
-  else
-    return nil
   end
 end
 
 local function main(file_name)
   local file = open_file(file_name)
   if not file then
-    print("Failed to process file.")
+    print("Failed to process the file.")
     return
   end
+
+
 
   close_file(file)
 end
